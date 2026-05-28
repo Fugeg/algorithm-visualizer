@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算法可视化平台 - 图表与代码汇总</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            padding: 40px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+            font-size: 28px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        /* 代码样式 */
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .code-keyword { color: #569cd6; }
+        .code-function { color: #dcdcaa; }
+        .code-string { color: #ce9178; }
+        .code-comment { color: #6a9955; }
+        .code-number { color: #b5cea8; }
+        .code-type { color: #4ec9b0; }
+        
+        /* 表格样式 - 三线表 */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        table caption {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        thead {
+            border-top: 2px solid #333;
+            border-bottom: 1px solid #333;
+        }
+        
+        tbody {
+            border-bottom: 2px solid #333;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+        }
+        
+        th {
+            font-weight: bold;
+            background: #f8f9fa;
+        }
+        
+        /* 图表示意样式 */
+        .diagram {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .ui-mockup {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .control-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+        
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+        }
+        
+        .visualization-area {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 200px;
+            gap: 4px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .bar {
+            width: 30px;
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .bar-value {
+            font-size: 10px;
+            margin-bottom: 2px;
+            color: #333;
+        }
+        
+        .bar-default { background: #3498db; }
+        .bar-comparing { background: #f39c12; }
+        .bar-swapping { background: #e74c3c; }
+        .bar-sorted { background: #27ae60; }
+        
+        /* 状态差量存储示意图 */
+        .state-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            padding: 20px;
+        }
+        
+        .state-box {
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            background: white;
+        }
+        
+        .state-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .array-display {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .array-item {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        
+        .array-item.changed {
+            background: #ffeaa7;
+            border-color: #fdcb6e;
+        }
+        
+        .delta-display {
+            background: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 10px 15px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        .arrow {
+            text-align: center;
+            font-size: 24px;
+            color: #7f8c8d;
+        }
+        
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 10px 15px;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-progress {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-pending {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>面向算法教学的可视化交互平台 - 图表与代码汇总</h1>
+        
+        <!-- 代码1: 基于生成器函数的排序状态生成逻辑 -->
+        <div class="section">
+            <h2 class="section-title">代码1 基于生成器函数的排序状态生成逻辑</h2>
+            <div class="code-block">
+<span class="code-keyword">interface</span> <span class="code-type">AlgorithmState</span> {
+  array: <span class="code-type">ArrayElement</span>[];      <span class="code-comment">// 当前数组状态</span>
+  codeLine: <span class="code-type">number</span>;          <span class="code-comment">// 当前执行的代码行号</span>
+  action: <span class="code-string">'compare'</span> | <span class="code-string">'swap'</span> | <span class="code-string">'sorted'</span>;
+  message: <span class="code-type">string</span>;          <span class="code-comment">// 操作说明</span>
+}
+
+<span class="code-comment">/**
+ * 基于生成器函数的冒泡排序状态生成器
+ * 使用 yield 关键字实现执行流的挂起与恢复
+ */</span>
+<span class="code-keyword">function</span>* <span class="code-function">bubbleSortGenerator</span>(arr: <span class="code-type">number</span>[]): <span class="code-type">Generator</span>&lt;<span class="code-type">AlgorithmState</span>&gt; {
+  <span class="code-keyword">const</span> n = arr.length;
+  <span class="code-keyword">const</span> array = arr.map(<span class="code-function">value</span> => ({ value, state: <span class="code-string">'default'</span> }));
+  
+  <span class="code-keyword">for</span> (<span class="code-keyword">let</span> i = <span class="code-number">0</span>; i &lt; n - <span class="code-number">1</span>; i++) {
+    <span class="code-keyword">let</span> swapped = <span class="code-keyword">false</span>;
+    
+    <span class="code-keyword">for</span> (<span class="code-keyword">let</span> j = <span class="code-number">0</span>; j &lt; n - i - <span class="code-number">1</span>; j++) {
+      <span class="code-comment">// 标记比较状态</span>
+      array[j].state = <span class="code-string">'comparing'</span>;
+      array[j + <span class="code-number">1</span>].state = <span class="code-string">'comparing'</span>;
+      
+      <span class="code-comment">// 生成比较状态</span>
+      <span class="code-keyword">yield</span> {
+        array: [...array],
+        codeLine: <span class="code-number">14</span>,
+        action: <span class="code-string">'compare'</span>,
+        message: <span class="code-string">`比较元素 ${array[j].value} 和 ${array[j+1].value}`</span>
+      };
+      
+      <span class="code-keyword">if</span> (array[j].value > array[j + <span class="code-number">1</span>].value) {
+        <span class="code-comment">// 标记交换状态</span>
+        array[j].state = <span class="code-string">'swapping'</span>;
+        array[j + <span class="code-number">1</span>].state = <span class="code-string">'swapping'</span>;
+        
+        <span class="code-keyword">yield</span> {
+          array: [...array],
+          codeLine: <span class="code-number">16</span>,
+          action: <span class="code-string">'swap'</span>,
+          message: <span class="code-string">`交换元素 ${array[j].value} 和 ${array[j+1].value}`</span>
+        };
+        
+        <span class="code-comment">// 执行交换</span>
+        [array[j], array[j + <span class="code-number">1</span>]] = [array[j + <span class="code-number">1</span>], array[j]];
+        swapped = <span class="code-keyword">true</span>;
+      }
+      
+      <span class="code-comment">// 重置状态</span>
+      array[j].state = <span class="code-string">'default'</span>;
+      array[j + <span class="code-number">1</span>].state = <span class="code-string">'default'</span>;
+    }
+    
+    <span class="code-comment">// 标记已排序元素</span>
+    array[n - i - <span class="code-number">1</span>].state = <span class="code-string">'sorted'</span>;
+    <span class="code-keyword">yield</span> {
+      array: [...array],
+      codeLine: <span class="code-number">21</span>,
+      action: <span class="code-string">'sorted'</span>,
+      message: <span class="code-string">`第 ${i + 1} 轮冒泡完成`</span>
+    };
+    
+    <span class="code-keyword">if</span> (!swapped) <span class="code-keyword">break</span>;
+  }
+  
+  <span class="code-comment">// 标记最后一个元素</span>
+  array[<span class="code-number">0</span>].state = <span class="code-string">'sorted'</span>;
+  <span class="code-keyword">yield</span> {
+    array: [...array],
+    codeLine: <span class="code-number">26</span>,
+    action: <span class="code-string">'sorted'</span>,
+    message: <span class="code-string">'冒泡排序完成'</span>
+  };
+}
+            </div>
+        </div>
+
+        <!-- 图4: 排序算法动画演示与交互控制面板 -->
+        <div class="section">
+            <h2 class="section-title">图4 排序算法动画演示与交互控制面板</h2>
+            <div class="ui-mockup">
+                <!-- 控制面板 -->
+                <div class="control-panel">
+                    <button class="control-btn">⏮</button>
+                    <button class="control-btn">⏸</button>
+                    <button class="control-btn" style="width: 50px; height: 50px; font-size: 20px;">▶</button>
+                    <button class="control-btn">⏭</button>
+                    <div class="slider-container">
+                        <span>速度:</span>
+                        <input type="range" min="0.5" max="4" step="0.5" value="1" style="width: 100px;">
+                        <span>1.0x</span>
+                    </div>
+                </div>
+                
+                <!-- 参数控制 -->
+                <div style="display: flex; gap: 20px; margin-bottom: 15px; padding: 10px; background: #f0f0f0; border-radius: 6px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; color: #666;">数组大小: 10</label>
+                        <input type="range" min="5" max="50" value="10" style="width: 100%;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; color: #666;">动画延迟: 500ms</label>
+                        <input type="range" min="50" max="1000" value="500" style="width: 100%;">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button style="padding: 8px 16px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">生成新数组</button>
+                        <button style="padding: 8px 16px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">开始排序</button>
+                    </div>
+                </div>
+                
+                <!-- 可视化区域 -->
+                <div class="visualization-area">
+                    <div class="bar bar-sorted" style="height: 60px;"><span class="bar-value">15</span></div>
+                    <div class="bar bar-sorted" style="height: 80px;"><span class="bar-value">20</span></div>
+                    <div class="bar bar-sorted" style="height: 100px;"><span class="bar-value">25</span></div>
+                    <div class="bar bar-sorted" style="height: 120px;"><span class="bar-value">30</span></div>
+                    <div class="bar bar-sorted" style="height: 140px;"><span class="bar-value">35</span></div>
+                    <div class="bar bar-comparing" style="height: 100px;"><span class="bar-value">25</span></div>
+                    <div class="bar bar-comparing" style="height: 80px;"><span class="bar-value">20</span></div>
+                    <div class="bar bar-default" style="height: 160px;"><span class="bar-value">40</span></div>
+                    <div class="bar bar-default" style="height: 180px;"><span class="bar-value">45</span></div>
+                    <div class="bar bar-default" style="height: 120px;"><span class="bar-value">30</span></div>
+                </div>
+                
+                <!-- 状态信息 -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8f9fa; border-radius: 6px;">
+                    <div style="font-size: 14px; color: #333;">
+                        <strong>当前状态:</strong> 比较元素 25 和 20
+                    </div>
+                    <div style="display: flex; gap: 20px; font-size: 13px; color: #666;">
+                        <span>比较次数: <strong style="color: #3498db;">12</strong></span>
+                        <span>交换次数: <strong style="color: #e74c3c;">5</strong></span>
+                    </div>
+                </div>
+                
+                <!-- 图例 -->
+                <div style="display: flex; gap: 20px; margin-top: 15px; justify-content: center;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <div style="width: 20px; height: 20px; background: #3498db; border-radius: 3px;"></div>
+                        <span style="font-size: 12px;">未排序</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <div style="width: 20px; height: 20px; background: #f39c12; border-radius: 3px;"></div>
+                        <span style="font-size: 12px;">比较中</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <div style="width: 20px; height: 20px; background: #e74c3c; border-radius: 3px;"></div>
+                        <span style="font-size: 12px;">交换中</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <div style="width: 20px; height: 20px; background: #27ae60; border-radius: 3px;"></div>
+                        <span style="font-size: 12px;">已排序</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 代码2: 交互控制系统播放逻辑实现 -->
+        <div class="section">
+            <h2 class="section-title">代码2 交互控制系统播放逻辑实现</h2>
+            <div class="code-block">
+<span class="code-keyword">interface</span> <span class="code-type">AnimationControllerState</span> {
+  isPlaying: <span class="code-type">boolean</span>;
+  currentStep: <span class="code-type">number</span>;
+  speed: <span class="code-type">number</span>;
+  history: <span class="code-type">AlgorithmState</span>[];
+}
+
+<span class="code-keyword">class</span> <span class="code-type">AnimationController</span> {
+  <span class="code-keyword">private</span> state: <span class="code-type">AnimationControllerState</span>;
+  <span class="code-keyword">private</span> generator: <span class="code-type">Generator</span>&lt;<span class="code-type">AlgorithmState</span>&gt; | <span class="code-keyword">null</span> = <span class="code-keyword">null</span>;
+  <span class="code-keyword">private</span> animationFrameId: <span class="code-type">number</span> | <span class="code-keyword">null</span> = <span class="code-keyword">null</span>;
+  <span class="code-keyword">private</span> delay: <span class="code-type">number</span> = <span class="code-number">500</span>;
+  
+  <span class="code-keyword">constructor</span>() {
+    <span class="code-keyword">this</span>.state = {
+      isPlaying: <span class="code-keyword">false</span>,
+      currentStep: <span class="code-number">0</span>,
+      speed: <span class="code-number">1</span>,
+      history: []
+    };
+  }
+  
+  <span class="code-comment">/**
+   * 初始化算法生成器
+   */</span>
+  <span class="code-function">initGenerator</span>(generator: <span class="code-type">Generator</span>&lt;<span class="code-type">AlgorithmState</span>&gt;) {
+    <span class="code-keyword">this</span>.generator = generator;
+    <span class="code-keyword">this</span>.state.history = [];
+    <span class="code-keyword">this</span>.state.currentStep = <span class="code-number">0</span>;
+    
+    <span class="code-comment">// 预生成所有状态</span>
+    <span class="code-keyword">let</span> result = generator.next();
+    <span class="code-keyword">while</span> (!result.done) {
+      <span class="code-keyword">this</span>.state.history.push(result.value);
+      result = generator.next();
+    }
+  }
+  
+  <span class="code-comment">/**
+   * 播放控制 - 启动动画
+   */</span>
+  <span class="code-keyword">async</span> <span class="code-function">play</span>() {
+    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.state.isPlaying) <span class="code-keyword">return</span>;
+    
+    <span class="code-keyword">this</span>.state.isPlaying = <span class="code-keyword">true</span>;
+    <span class="code-keyword">this</span>.<span class="code-function">runAnimationLoop</span>();
+  }
+  
+  <span class="code-comment">/**
+   * 播放控制 - 暂停动画
+   */</span>
+  <span class="code-function">pause</span>() {
+    <span class="code-keyword">this</span>.state.isPlaying = <span class="code-keyword">false</span>;
+    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.animationFrameId) {
+      cancelAnimationFrame(<span class="code-keyword">this</span>.animationFrameId);
+    }
+  }
+  
+  <span class="code-comment">/**
+   * 单步前进
+   */</span>
+  <span class="code-function">stepForward</span>(): <span class="code-type">AlgorithmState</span> | <span class="code-keyword">null</span> {
+    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.state.currentStep < <span class="code-keyword">this</span>.state.history.length - <span class="code-number">1</span>) {
+      <span class="code-keyword">this</span>.state.currentStep++;
+      <span class="code-keyword">return</span> <span class="code-keyword">this</span>.state.history[<span class="code-keyword">this</span>.state.currentStep];
+    }
+    <span class="code-keyword">return</span> <span class="code-keyword">null</span>;
+  }
+  
+  <span class="code-comment">/**
+   * 单步回退
+   */</span>
+  <span class="code-function">stepBackward</span>(): <span class="code-type">AlgorithmState</span> | <span class="code-keyword">null</span> {
+    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.state.currentStep > <span class="code-number">0</span>) {
+      <span class="code-keyword">this</span>.state.currentStep--;
+      <span class="code-keyword">return</span> <span class="code-keyword">this</span>.state.history[<span class="code-keyword">this</span>.state.currentStep];
+    }
+    <span class="code-keyword">return</span> <span class="code-keyword">null</span>;
+  }
+  
+  <span class="code-comment">/**
+   * 动画循环 - 使用 requestAnimationFrame 实现流畅动画
+   */</span>
+  <span class="code-keyword">private</span> <span class="code-function">runAnimationLoop</span>() {
+    <span class="code-keyword">const</span> step = () => {
+      <span class="code-keyword">if</span> (!<span class="code-keyword">this</span>.state.isPlaying) <span class="code-keyword">return</span>;
+      
+      <span class="code-keyword">const</span> nextState = <span class="code-keyword">this</span>.<span class="code-function">stepForward</span>();
+      <span class="code-keyword">if</span> (nextState) {
+        <span class="code-comment">// 渲染当前状态</span>
+        <span class="code-keyword">this</span>.<span class="code-function">render</span>(nextState);
+        
+        <span class="code-comment">// 根据速度计算延迟</span>
+        <span class="code-keyword">const</span> adjustedDelay = <span class="code-keyword">this</span>.delay / <span class="code-keyword">this</span>.state.speed;
+        <span class="code-keyword">this</span>.animationFrameId = window.setTimeout(() => {
+          requestAnimationFrame(() => <span class="code-keyword">this</span>.<span class="code-function">runAnimationLoop</span>());
+        }, adjustedDelay) as unknown as <span class="code-type">number</span>;
+      } <span class="code-keyword">else</span> {
+        <span class="code-comment">// 动画结束</span>
+        <span class="code-keyword">this</span>.state.isPlaying = <span class="code-keyword">false</span>;
+      }
+    };
+    
+    step();
+  }
+  
+  <span class="code-comment">/**
+   * 设置播放速度
+   */</span>
+  <span class="code-function">setSpeed</span>(speed: <span class="code-type">number</span>) {
+    <span class="code-keyword">this</span>.state.speed = Math.<span class="code-function">max</span>(<span class="code-number">0.5</span>, Math.<span class="code-function">min</span>(<span class="code-number">4.0</span>, speed));
+  }
+  
+  <span class="code-comment">/**
+   * 重置动画
+   */</span>
+  <span class="code-function">reset</span>() {
+    <span class="code-keyword">this</span>.<span class="code-function">pause</span>();
+    <span class="code-keyword">this</span>.state.currentStep = <span class="code-number">0</span>;
+    <span class="code-keyword">if</span> (<span class="code-keyword">this</span>.state.history.length > <span class="code-number">0</span>) {
+      <span class="code-keyword">this</span>.<span class="code-function">render</span>(<span class="code-keyword">this</span>.state.history[<span class="code-number">0</span>]);
+    }
+  }
+  
+  <span class="code-keyword">private</span> <span class="code-function">render</span>(state: <span class="code-type">AlgorithmState</span>) {
+    <span class="code-comment">// 触发重绘，更新Canvas和代码高亮</span>
+    <span class="code-function">dispatchEvent</span>(<span class="code-keyword">new</span> <span class="code-function">CustomEvent</span>(<span class="code-string">'stateChange'</span>, { detail: state }));
+  }
+}
+            </div>
+        </div>
+
+        <!-- 表1: 当前已完成模块进度表 -->
+        <div class="section">
+            <h2 class="section-title">表1 当前已完成模块进度表</h2>
+            <div class="table-container">
+                <table>
+                    <caption style="text-align: center; font-weight: bold; margin-bottom: 10px;">表1 当前已完成模块进度表</caption>
+                    <thead>
+                        <tr>
+                            <th>模块类别</th>
+                            <th>具体模块</th>
+                            <th>完成情况</th>
+                            <th>完成度</th>
+                            <th>关键功能点</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="3">核心引擎</td>
+                            <td>Canvas渲染引擎</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>高DPI适配、自适应缩放</td>
+                        </tr>
+                        <tr>
+                            <td>状态管理系统</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>Redux Toolkit状态流管理</td>
+                        </tr>
+                        <tr>
+                            <td>动画帧调度</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>requestAnimationFrame同步</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="3">数据结构可视化</td>
+                            <td>数组可视化</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>柱状图映射、HSL色彩空间</td>
+                        </tr>
+                        <tr>
+                            <td>链表可视化</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>节点实例、贝塞尔曲线指针</td>
+                        </tr>
+                        <tr>
+                            <td>栈/队列可视化</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>入出栈变形动画</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="5">排序算法模块</td>
+                            <td>冒泡排序</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>生成器化改造、状态同步</td>
+                        </tr>
+                        <tr>
+                            <td>选择排序</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>最小元素查找可视化</td>
+                        </tr>
+                        <tr>
+                            <td>插入排序</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>元素后移与插入动画</td>
+                        </tr>
+                        <tr>
+                            <td>快速排序</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>递归栈同步、分区动画</td>
+                        </tr>
+                        <tr>
+                            <td>归并排序</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>分治区间可视化、合并过程</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="3">交互控制系统</td>
+                            <td>播放/暂停控制</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>状态机切换</td>
+                        </tr>
+                        <tr>
+                            <td>步进控制</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>单步前进/回退、历史栈</td>
+                        </tr>
+                        <tr>
+                            <td>速度调节</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>0.5x-4.0x无级调节</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">代码双同步</td>
+                            <td>代码高亮</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>行级高亮、平滑滚动</td>
+                        </tr>
+                        <tr>
+                            <td>动画同步</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>60FPS同步、无延迟</td>
+                        </tr>
+                        <tr>
+                            <td>部署</td>
+                            <td>前端部署</td>
+                            <td><span class="status-badge status-completed">已完成</span></td>
+                            <td>100%</td>
+                            <td>生产环境打包、云服务器部署</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 图5: 状态差量存储与还原机制示意图 -->
+        <div class="section">
+            <h2 class="section-title">图5 状态差量存储与还原机制示意图</h2>
+            <div class="diagram">
+                <div class="state-diagram">
+                    <!-- 传统全量快照 -->
+                    <div class="state-box" style="border-color: #e74c3c;">
+                        <div class="state-title" style="color: #e74c3c;">❌ 传统方案：全量快照存储</div>
+                        <div style="margin: 10px 0;">
+                            <strong>初始状态:</strong>
+                            <div class="array-display">
+                                <div class="array-item">64</div>
+                                <div class="array-item">34</div>
+                                <div class="array-item">25</div>
+                                <div class="array-item">12</div>
+                                <div class="array-item">22</div>
+                                <div class="array-item">11</div>
+                                <div class="array-item">90</div>
+                            </div>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <strong>Step 1 全量快照:</strong>
+                            <div class="delta-display">{ array: [34, 64, 25, 12, 22, 11, 90], line: 5, action: 'swap' }<br>存储大小: 7个元素 × 4字节 = 28字节</div>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <strong>Step 2 全量快照:</strong>
+                            <div class="delta-display">{ array: [34, 25, 64, 12, 22, 11, 90], line: 5, action: 'swap' }<br>存储大小: 7个元素 × 4字节 = 28字节</div>
+                        </div>
+                        <div class="note" style="border-color: #e74c3c; background: #fadbd8;">
+                            <strong>内存问题：</strong>快速排序处理大规模逆序数据时，时间复杂度退化为O(N²)，状态步数极其庞大，极易触发内存溢出！
+                        </div>
+                    </div>
+                    
+                    <div class="arrow">⬇ 优化方案 ⬇</div>
+                    
+                    <!-- 差量存储方案 -->
+                    <div class="state-box" style="border-color: #27ae60;">
+                        <div class="state-title" style="color: #27ae60;">✅ 优化方案：差量快照存储</div>
+                        <div style="margin: 10px 0;">
+                            <strong>初始状态（基准）:</strong>
+                            <div class="array-display">
+                                <div class="array-item">64</div>
+                                <div class="array-item">34</div>
+                                <div class="array-item">25</div>
+                                <div class="array-item">12</div>
+                                <div class="array-item">22</div>
+                                <div class="array-item">11</div>
+                                <div class="array-item">90</div>
+                            </div>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <strong>Step 1 差量记录:</strong>
+                            <div class="delta-display">{ index: 0, target: 1, action: 'SWAP' }<br>存储大小: 3个字段 ≈ 12字节 (节省57%)</div>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <strong>Step 2 差量记录:</strong>
+                            <div class="delta-display">{ index: 1, target: 2, action: 'SWAP' }<br>存储大小: 3个字段 ≈ 12字节 (节省57%)</div>
+                        </div>
+                        <div style="margin: 10px 0;">
+                            <strong>Step N 差量记录:</strong>
+                            <div class="delta-display">{ index: i, value: v, action: 'UPDATE' }<br>仅记录变化的索引和值</div>
+                        </div>
+                        <div class="note" style="border-color: #27ae60; background: #d5f5e3;">
+                            <strong>还原过程：</strong>从初始状态出发，按序重放操作序列来还原现场。预计可削减85%以上的内存开销，支持万级数据规模！
+                        </div>
+                    </div>
+                    
+                    <!-- 对比总结 -->
+                    <div style="display: flex; gap: 20px; margin-top: 20px;">
+                        <div style="flex: 1; padding: 15px; background: #fadbd8; border-radius: 8px; text-align: center;">
+                            <strong style="color: #c0392b;">全量快照</strong>
+                            <div style="margin-top: 10px; font-size: 13px;">
+                                1000步 × 1000元素 × 4字节<br>
+                                ≈ <strong>4MB</strong> 内存占用
+                            </div>
+                        </div>
+                        <div style="flex: 1; padding: 15px; background: #d5f5e3; border-radius: 8px; text-align: center;">
+                            <strong style="color: #27ae60;">差量存储</strong>
+                            <div style="margin-top: 10px; font-size: 13px;">
+                                1000步 × 3字段 × 4字节 + 初始数组<br>
+                                ≈ <strong>0.6MB</strong> 内存占用 (节省85%)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 表2: 后期工作计划表 -->
+        <div class="section">
+            <h2 class="section-title">表2 后期工作计划表</h2>
+            <div class="table-container">
+                <table>
+                    <caption style="text-align: center; font-weight: bold; margin-bottom: 10px;">表2 后期工作计划表</caption>
+                    <thead>
+                        <tr>
+                            <th>时间阶段</th>
+                            <th>主要任务</th>
+                            <th>预期目标</th>
+                            <th>关键技术点</th>
+                            <th>验收标准</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td rowspan="2">第9-10周<br>(非线性结构)</td>
+                            <td>树结构可视化</td>
+                            <td>二叉搜索树、红黑树自适应布局</td>
+                            <td>递归分割布局、旋转动画</td>
+                            <td>节点不重叠、平滑过渡</td>
+                        </tr>
+                        <tr>
+                            <td>图结构可视化</td>
+                            <td>BFS/DFS遍历动画</td>
+                            <td>力导向物理模型、色彩波纹</td>
+                            <td>500节点流畅渲染</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">第11-12周<br>(动态规划+后端)</td>
+                            <td>动态规划模块</td>
+                            <td>二维表格网格渲染</td>
+                            <td>状态转移方程可视化、填表过程</td>
+                            <td>行列高亮联动</td>
+                        </tr>
+                        <tr>
+                            <td>后端服务开发</td>
+                            <td>用户系统与学习进度保存</td>
+                            <td>Node.js REST API、JWT鉴权</td>
+                            <td>前后端数据联调完成</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">第13-14周<br>(测试与论文)</td>
+                            <td>系统测试</td>
+                            <td>功能测试与性能测试</td>
+                            <td>用户体验测试、自动化脚本</td>
+                            <td>万级数据验证通过</td>
+                        </tr>
+                        <tr>
+                            <td>论文撰写</td>
+                            <td>毕业论文初稿</td>
+                            <td>系统架构、生成器同步机制</td>
+                            <td>初稿完成度100%</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">第15-16周<br>(答辩准备)</td>
+                            <td>论文修订</td>
+                            <td>论文定稿</td>
+                            <td>逻辑结构、图表规范</td>
+                            <td>指导教师审核通过</td>
+                        </tr>
+                        <tr>
+                            <td>答辩筹备</td>
+                            <td>答辩PPT与Demo准备</td>
+                            <td>典型算法用例、技术细节预设</td>
+                            <td>答辩材料完整</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="note" style="margin-top: 30px; text-align: center;">
+            <strong>使用说明：</strong>本页面包含毕业设计中期报告所需的全部图表和代码示例。<br>
+            请使用浏览器截图功能或打印为PDF后插入Word文档中。
+        </div>
+    </div>
+</body>
+</html>
