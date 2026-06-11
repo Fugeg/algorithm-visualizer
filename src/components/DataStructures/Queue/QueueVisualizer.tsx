@@ -1,12 +1,35 @@
+/**
+ * @fileoverview 队列可视化展示组件（QueueVisualizer）
+ *
+ * 本组件负责将队列数据渲染为水平排列的元素序列，模拟真实的队列结构。
+ *
+ * 可视化原理：
+ * - 使用水平 Flexbox 布局，队首在左方，队尾在右方
+ * - 每个元素显示位置标签（Front/Rear/Index）和值
+ * - 队首使用绿色边框标记，队尾使用黄色边框标记
+ * - 元素之间使用箭头图标表示入队方向
+ *
+ * 渲染逻辑：
+ * 1. 遍历 items 数组，为每个元素创建容器
+ * 2. 在相邻元素之间渲染右箭头（最后一个元素后不渲染）
+ * 3. 根据索引判断是否为 front 或 rear，应用特殊边框颜色
+ * 4. 底部显示 Front 和 Rear 指针的当前值
+ */
+
 import React from 'react';
 import { FiArrowRight } from 'react-icons/fi';
 
+/** QueueVisualizer 组件的 Props 接口定义 */
 interface QueueVisualizerProps {
   items: any[];
   highlightIndices: number[];
   front: number;
   rear: number;
 }
+
+/**
+ * 队列可视化组件
+ */
 
 const QueueVisualizer: React.FC<QueueVisualizerProps> = ({ 
   items, 

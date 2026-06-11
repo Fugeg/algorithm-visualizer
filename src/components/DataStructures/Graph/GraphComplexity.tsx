@@ -1,4 +1,19 @@
+/**
+ * @fileoverview 图复杂度分析展示组件（GraphComplexity）
+ *
+ * 本组件展示图操作的复杂度分析，对比邻接表和邻接矩阵两种存储方式。
+ *
+ * 内容包括：
+ * 1. 复杂度对比表格：邻接表 vs 邻接矩阵的各种操作复杂度
+ * 2. 图的特点说明：基本性质、适用场景
+ * 3. 存储方式比较：邻接表和邻接矩阵的优缺点对比
+ */
+
 import React from 'react';
+
+/**
+ * 图复杂度分析组件
+ */
 
 const GraphComplexity: React.FC = () => {
   const complexityData = [

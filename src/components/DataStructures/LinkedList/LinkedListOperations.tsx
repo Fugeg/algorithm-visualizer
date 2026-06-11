@@ -1,5 +1,24 @@
+/**
+ * @fileoverview 链表操作控制面板组件（LinkedListOperations）
+ *
+ * 本组件提供链表的交互式操作界面，是用户与链表数据结构交互的"控制层"。
+ *
+ * 功能模块：
+ * 1. 头部插入/尾部追加区：输入值 → 触发 onPrepend 或 onAppend
+ * 2. 指定位置插入区：输入值 + 位置索引 → 触发 onInsert
+ * 3. 删除操作区：输入位置索引 → 触发 onDelete
+ * 4. 搜索操作区：输入搜索值 → 触发 onSearch
+ *
+ * UI 特点：
+ * - 按钮颜色区分功能：绿色(头部插入)、蓝色(尾部追加)、紫色(位置插入)、黄色(搜索)
+ * - 所有操作前都验证输入非空
+ */
+
 import React, { useState } from 'react';
 
+/**
+ * LinkedListOperations 组件的 Props 接口定义
+ */
 interface LinkedListOperationsProps {
   onPrepend: (value: any) => void;
   onAppend: (value: any) => void;
@@ -8,6 +27,10 @@ interface LinkedListOperationsProps {
   onSearch: (value: any) => void;
   maxIndex: number;
 }
+
+/**
+ * 链表操作控制面板组件
+ */
 
 const LinkedListOperations: React.FC<LinkedListOperationsProps> = ({
   onPrepend,

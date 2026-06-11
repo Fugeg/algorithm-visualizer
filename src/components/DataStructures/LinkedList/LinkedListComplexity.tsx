@@ -1,4 +1,21 @@
+/**
+ * @fileoverview 链表复杂度分析展示组件（LinkedListComplexity）
+ *
+ * 本组件负责以表格形式展示链表各种操作的时间复杂度和空间复杂度分析。
+ *
+ * 展示的操作：
+ * - 头部插入 (Prepend): O(1) - 直接修改头指针
+ * - 尾部追加 (Append): O(n) - 需要遍历到链表末尾
+ * - 指定位置插入: O(n) - 需要遍历到目标位置
+ * - 删除: O(n) - 需要找到目标节点的前驱
+ * - 搜索: O(n) - 需要顺序遍历整个链表
+ */
+
 import React from 'react';
+
+/**
+ * 链表复杂度分析组件
+ */
 
 const LinkedListComplexity: React.FC = () => {
   const complexityData = [

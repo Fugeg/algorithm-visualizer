@@ -1,4 +1,19 @@
+/**
+ * @fileoverview 二叉树复杂度分析展示组件（BinaryTreeComplexity）
+ *
+ * 本组件展示二叉搜索树的操作复杂度和特点说明。
+ *
+ * 内容包括：
+ * 1. 复杂度表格：插入、删除、搜索、遍历的平均/最坏情况
+ * 2. 特点说明：BST的性质、适用场景
+ * 3. 性能考虑：平衡性影响、退化情况、自平衡方案
+ */
+
 import React from 'react';
+
+/**
+ * 二叉树复杂度分析组件
+ */
 
 const BinaryTreeComplexity: React.FC = () => {
   const complexityData = [

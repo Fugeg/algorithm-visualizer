@@ -1,3 +1,29 @@
+/**
+ * @fileoverview 图算法（Graph Algorithms）可视化主页面组件
+ *
+ * 本组件是图算法可视化的顶层容器，负责：
+ * 1. 支持三种经典图算法的演示：Dijkstra最短路径、BFS广度优先搜索、DFS深度优先搜索
+ * 2. 管理算法执行过程的状态机（通过 PlaybackController 实现步骤控制）
+ * 3. 提供丰富的可视化展示：图结构、距离表、遍历信息、伪代码同步高亮、变量监控
+ * 4. 实现算法步骤的播放控制：开始、暂停、单步前进/后退、跳转、速度调节
+ *
+ * 可视化方式：
+ * - 使用 SVG 绘制带权重的有向图（节点+边+权重标签）
+ * - 节点颜色编码：白色(未访问)、黄色(当前)、绿色(已访问)
+ * - 边的颜色和粗细表示是否被访问
+ * - Dijkstra模式下显示每个节点的距离值（d=...）
+ *
+ * 操作类型：
+ * - Dijkstra: 单源最短路径算法，使用优先队列优化
+ * - BFS: 广度优先遍历，使用队列辅助，按层次访问
+ * - DFS: 深度优先遍历，使用栈辅助，沿深度方向探索
+ *
+ * 架构特点：
+ * - 使用观察者模式订阅 PlaybackController 的状态变化
+ * - 每个算法生成独立的步骤数组（Steps），供回放控制器使用
+ * - 支持伪代码行级高亮同步，帮助理解算法执行流程
+ */
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { DijkstraAlgorithm, DijkstraStep, DijkstraNode, DijkstraEdge } from '../../models/DijkstraAlgorithm';
 import { PlaybackController } from '../../models/PlaybackController';
@@ -6,8 +32,25 @@ import CodeSyncPanel from '../Visualization/CodeSyncPanel';
 import VariableMonitorPanel from '../Visualization/VariableMonitorPanel';
 import DataStructureLayout from '../Layout/DataStructureLayout';
 
+/**
+ * 算法模式枚举类型
+ * @type {'dijkstra' | 'bfs' | 'dfs'}
+ */
 type AlgorithmMode = 'dijkstra' | 'bfs' | 'dfs';
 
+/**
+ * 遍历步骤接口定义（用于BFS和DFS）
+ * @interface TraversalStep
+ * @property {number} id - 步骤唯一标识
+ * @property {string} type - 步骤类型：visit(访问)/enqueue(入队)/dequeue(出队)/push(压栈)/pop(弹栈)/complete(完成)
+ * @property {string} currentNode - 当前正在处理的节点ID
+ * @property {string[]} visited - 已访问节点列表
+ * @property {string[]} [queue] - 当前队列状态（BFS专用）
+ * @property {string[]} [stack] - 当前栈状态（DFS专用）
+ * @property {string} message - 步骤描述信息
+ * @property {number} highlightLine - 需要高亮的伪代码行号（-1表示不高亮）
+ * @property {Record<string, string | number>} variables - 当前变量状态快照
+ */
 interface TraversalStep {
   id: number;
   type: 'visit' | 'enqueue' | 'dequeue' | 'push' | 'pop' | 'complete';
@@ -20,8 +63,11 @@ interface TraversalStep {
   variables: Record<string, string | number>;
 }
 
+/**
+ * Dijkstra算法伪代码配置
+ * 用于 CodeSyncPanel 组件的代码高亮同步展示
+ */
 const DIJKSTRA_PSEUDOCODE = {
-  title: 'Dijkstra 伪代码',
   lines: [
     { text: 'function dijkstra(G, start):', indent: 0 },
     { text: 'dist[v] = ∞ for all v; dist[start] = 0', indent: 1 },
@@ -83,16 +129,35 @@ const DEFAULT_EDGES: DijkstraEdge[] = [
 ];
 
 const GraphAlgorithms: React.FC = () => {
+  /** 当前选择的算法模式：dijkstra/bfs/dfs */
   const [algorithmMode, setAlgorithmMode] = useState<AlgorithmMode>('dijkstra');
+
+  /** Dijkstra算法模型实例（单例，组件生命周期内保持不变） */
   const [dijkstraAlgorithm] = useState(() => new DijkstraAlgorithm());
+
+  /**
+   * 播放控制器实例
+   * 负责管理算法步骤的播放、暂停、前进、后退等控制
+   * 泛型参数为联合类型：DijkstraStep | TraversalStep
+   */
   const [playbackController] = useState(() => new PlaybackController<DijkstraStep | TraversalStep>(500));
+
+  /** 播放控制器的当前状态（当前步骤索引、总步骤数、是否正在播放等） */
   const [playbackState, setPlaybackState] = useState(playbackController.getState());
+
+  /** 算法的起始节点（默认为'A'） */
   const [startNode, setStartNode] = useState<string>('A');
+
+  /** 标记算法是否正在执行（用于禁用UI控件） */
   const [isRunning, setIsRunning] = useState(false);
-  const [visitedNodes, setVisitedNodes] = useState<string[]>([]);
-  const [currentNode, setCurrentNode] = useState<string | null>(null);
-  const [distances, setDistances] = useState<Record<string, number>>({});
-  const [path, setPath] = useState<Record<string, string | null>>({});
+
+  /**
+   * 以下状态用于可视化展示：
+   * - visitedNodes: 已访问节点列表（用于节点着色）
+   * - currentNode: 当前正在处理的节点（黄色高亮）
+   * - distances: Dijkstra算法的距离表（节点ID → 距离值）
+   * - path: Dijkstra算法的前驱表（节点ID → 前驱节点ID）
+   */
   const [highlightLine, setHighlightLine] = useState(-1);
   const [variables, setVariables] = useState<Record<string, string | number>>({});
   const [message, setMessage] = useState('');

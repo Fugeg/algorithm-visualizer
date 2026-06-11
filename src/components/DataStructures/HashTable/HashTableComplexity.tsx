@@ -1,4 +1,19 @@
+/**
+ * @fileoverview 哈希表复杂度分析展示组件（HashTableComplexity）
+ *
+ * 本组件展示哈希表操作的复杂度分析、特点说明和性能考虑。
+ *
+ * 内容包括：
+ * 1. 复杂度表格：插入、查找、删除的平均/最坏情况
+ * 2. 特点说明：哈希表的基本性质、适用场景
+ * 3. 性能考虑：负载因子、哈希函数选择、冲突解决策略
+ */
+
 import React from 'react';
+
+/**
+ * 哈希表复杂度分析组件
+ */
 
 const HashTableComplexity: React.FC = () => {
   const complexityData = [

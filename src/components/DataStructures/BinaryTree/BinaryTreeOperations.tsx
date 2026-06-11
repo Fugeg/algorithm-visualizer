@@ -1,10 +1,31 @@
+/**
+ * @fileoverview 二叉树操作控制面板组件（BinaryTreeOperations）
+ *
+ * 本组件提供二叉搜索树（BST）的交互式操作界面。
+ *
+ * 功能：
+ * - 插入节点：输入值后按BST规则插入到合适位置
+ * - 删除节点：输入值后删除对应节点并重新平衡
+ * - 搜索节点：输入值后高亮显示搜索路径
+ * - 随机插入：自动生成随机值并插入
+ *
+ * UI特点：
+ * - 操作结果以消息形式显示，2秒后自动消失
+ * - 按钮颜色区分功能：蓝色(插入)、红色(删除)、绿色(搜索)、紫色(随机)
+ */
+
 import React, { useState } from 'react';
 
+/** BinaryTreeOperations 组件的 Props 接口定义 */
 interface BinaryTreeOperationsProps {
   onInsert: (value: number) => Promise<void>;
   onDelete: (value: number) => Promise<void>;
   onSearch: (value: number) => Promise<boolean>;
 }
+
+/**
+ * 二叉树操作控制面板组件
+ */
 
 const BinaryTreeOperations: React.FC<BinaryTreeOperationsProps> = ({
   onInsert,

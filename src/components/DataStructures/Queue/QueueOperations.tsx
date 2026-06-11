@@ -1,5 +1,17 @@
+/**
+ * @fileoverview 队列操作控制面板组件（QueueOperations）
+ *
+ * 本组件提供队列的交互式操作界面，支持入队、出队和查看队首操作。
+ *
+ * 功能特点：
+ * - 入队时检查队列是否已满，满时禁用按钮
+ * - 出队/查看时检查队列是否为空，空时禁用按钮
+ * - 操作结果显示为消息提示，2秒后自动消失
+ */
+
 import React, { useState } from 'react';
 
+/** QueueOperations 组件的 Props 接口定义 */
 interface QueueOperationsProps {
   onEnqueue: (value: any) => Promise<boolean>;
   onDequeue: () => Promise<any>;
@@ -7,6 +19,10 @@ interface QueueOperationsProps {
   isFull: boolean;
   isEmpty: boolean;
 }
+
+/**
+ * 队列操作控制面板组件
+ */
 
 const QueueOperations: React.FC<QueueOperationsProps> = ({
   onEnqueue,

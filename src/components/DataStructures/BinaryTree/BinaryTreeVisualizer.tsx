@@ -1,23 +1,65 @@
+/**
+ * @fileoverview 二叉树可视化展示组件（BinaryTreeVisualizer）
+ *
+ * 本组件负责将二叉树数据结构渲染为层级化的树形图，是二叉树的"视图层"。
+ *
+ * 可视化原理：
+ * - 使用 DOM 操作（非 SVG/Canvas）动态创建节点和连接线
+ * - 采用递归算法计算每个节点的屏幕坐标位置
+ * - 根节点居中显示，子节点按层次向下展开
+ * - 左子节点在左侧，右子节点在右侧
+ *
+ * 渲染技术：
+ * 1. 使用 useEffect + useRef 在容器中动态创建 DOM 元素
+ * 2. 节点使用 <div> 渲染为圆形，支持高亮和悬停效果
+ * 3. 连接线使用绝对定位的 <div>，通过 CSS transform: rotate() 实现任意角度
+ * 4. 自动缩放：根据树的大小和容器尺寸计算缩放比例
+ *
+ * 坐标计算逻辑：
+ * - 根节点位于容器顶部中央
+ * - 每层的水平间距 = 上层间距 / 2（指数衰减）
+ * - 垂直间距固定为节点大小的2倍
+ * - 路径记录：'0' → '0L' → '0LR' 表示从根到当前节点的路径
+ */
+
 import React, { useEffect, useRef, useState } from 'react';
 import './BinaryTreeVisualizer.css';
 
+/**
+ * 二叉树节点接口定义
+ * @interface TreeNode
+ * @property {number | string} value - 节点值
+ * @property {TreeNode} [left] - 左子节点
+ * @property {TreeNode} [right] - 右子节点
+ */
 interface TreeNode {
-  value: any;
+  value: number | string;
   left?: TreeNode;
   right?: TreeNode;
 }
 
+/**
+ * BinaryTreeVisualizer 组件的 Props 接口定义
+ */
 interface BinaryTreeVisualizerProps {
   root: TreeNode | null;
   highlightNodes: string[];
 }
+
+/**
+ * 二叉树可视化组件
+ *
+ * @component
+ * @description 将二叉树数据渲染为层级化的树形结构，支持路径高亮
+ */
 
 const BinaryTreeVisualizer: React.FC<BinaryTreeVisualizerProps> = ({
   root,
   highlightNodes = []
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [, setScale] = useState(1);
+  // 使用 forceUpdate 触发重渲染以应用新的缩放比例（state 值本身不需要读取）
+  const [, forceUpdate] = useState(0);
 
   // 获取树的深度和每层节点数
   const getTreeInfo = (node: TreeNode | null): { depth: number; widths: number[] } => {
@@ -140,7 +182,7 @@ const BinaryTreeVisualizer: React.FC<BinaryTreeVisualizerProps> = ({
 
     // 计算缩放比例
     const newScale = calculateScale(containerWidth, containerHeight, idealTreeWidth, idealTreeHeight);
-    setScale(newScale);
+    forceUpdate(n => n + 1); // 触发重渲染以应用新的缩放比例
 
     // 应用缩放后的尺寸
     const nodeSize = baseNodeSize * newScale;
@@ -157,6 +199,13 @@ const BinaryTreeVisualizer: React.FC<BinaryTreeVisualizerProps> = ({
 
     // 渲染树
     renderNode(contentDiv, root, startX, startY, 0, depth, nodeSize, horizontalSpacing);
+    
+    // 清理函数：组件卸载或重新渲染时移除手动创建的DOM节点
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [root, highlightNodes]);
 

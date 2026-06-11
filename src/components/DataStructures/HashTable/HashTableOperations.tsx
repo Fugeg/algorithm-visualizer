@@ -1,11 +1,32 @@
+/**
+ * @fileoverview 哈希表操作控制面板组件（HashTableOperations）
+ *
+ * 本组件提供哈希表的交互式操作界面，支持设置、查找、删除和清空操作。
+ *
+ * 功能模块：
+ * 1. 设置键值对区：输入键和值 → 触发 onSet
+ * 2. 查找/删除区：输入键 → 触发 onGet 或 onDelete
+ * 3. 清空按钮：一键清空所有数据
+ * 4. 示例数据：快速添加预设的测试数据
+ *
+ * UI特点：
+ * - 操作期间禁用所有控件（isLoading 状态）
+ * - 操作结果显示为消息提示，2秒后自动消失
+ */
+
 import React, { useState } from 'react';
 
+/** HashTableOperations 组件的 Props 接口定义 */
 interface HashTableOperationsProps {
   onSet: (key: string, value: string) => Promise<boolean>;
   onGet: (key: string) => Promise<string | null>;
   onDelete: (key: string) => Promise<boolean>;
   onClear: () => Promise<void>;
 }
+
+/**
+ * 哈希表操作控制面板组件
+ */
 
 const HashTableOperations: React.FC<HashTableOperationsProps> = ({
   onSet,

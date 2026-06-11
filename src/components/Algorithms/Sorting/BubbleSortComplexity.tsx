@@ -1,14 +1,37 @@
+/**
+ * @fileoverview 冒泡排序复杂度分析展示组件
+ * @description 专门为冒泡排序算法设计的复杂度分析面板。
+ *              包含四个部分：复杂度表格、执行统计、算法说明、优化建议。
+ *              用于帮助用户全面理解冒泡排序的性能特征和改进方向。
+ */
+
 import React from 'react';
 
+/**
+ * BubbleSortComplexity组件属性接口
+ * @interface BubbleSortComplexityProps
+ * @property comparisons - 当前已执行的比较操作次数
+ * @property swaps - 当前已执行的交换操作次数
+ */
 interface BubbleSortComplexityProps {
   comparisons: number;
   swaps: number;
 }
 
+/**
+ * 冒泡排序复杂度分析组件
+ * @param props - 组件属性：comparisons（比较次数）、swaps（交换次数）
+ * @description 展示内容：
+ *              1. 复杂度对比表：最好/平均/最坏情况的时间和空间复杂度
+ *              2. 实时执行统计：当前演示中的比较和交换计数
+ *              3. 算法原理说明：冒泡排序的工作机制和步骤
+ *              4. 优化建议：常见的性能优化方案
+ */
 const BubbleSortComplexity: React.FC<BubbleSortComplexityProps> = ({
   comparisons,
   swaps
 }) => {
+  /** 冒泡排序各情况下的复杂度数据配置 */
   const complexityData = [
     { case: '最好情况', time: 'O(n)', space: 'O(1)', description: '数组已经有序' },
     { case: '平均情况', time: 'O(n²)', space: 'O(1)', description: '随机顺序的数组' },
@@ -17,6 +40,7 @@ const BubbleSortComplexity: React.FC<BubbleSortComplexityProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* ==================== 第一部分：复杂度对比表格 ==================== */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full">
           <thead className="bg-gray-50">
@@ -40,7 +64,7 @@ const BubbleSortComplexity: React.FC<BubbleSortComplexityProps> = ({
         </table>
       </div>
 
-      {/* 当前执行统计 */}
+      {/* ==================== 第二部分：当前执行统计 ==================== */}
       <div className="bg-blue-50 rounded-lg p-4">
         <h4 className="text-lg font-semibold mb-2 text-blue-700">执行统计</h4>
         <div className="grid grid-cols-2 gap-4">
@@ -55,7 +79,7 @@ const BubbleSortComplexity: React.FC<BubbleSortComplexityProps> = ({
         </div>
       </div>
 
-      {/* 算法说明 */}
+      {/* ==================== 第三部分：算法原理说明 ==================== */}
       <div className="bg-yellow-50 rounded-lg p-4">
         <h4 className="text-lg font-semibold mb-2 text-yellow-700">算法说明</h4>
         <div className="space-y-2 text-gray-700">
@@ -72,7 +96,7 @@ const BubbleSortComplexity: React.FC<BubbleSortComplexityProps> = ({
         </div>
       </div>
 
-      {/* 优化建议 */}
+      {/* ==================== 第四部分：优化建议 ==================== */}
       <div className="bg-green-50 rounded-lg p-4">
         <h4 className="text-lg font-semibold mb-2 text-green-700">优化建议</h4>
         <ul className="list-disc list-inside space-y-1 text-gray-700">

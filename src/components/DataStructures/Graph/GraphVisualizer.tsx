@@ -1,17 +1,45 @@
+/**
+ * @fileoverview 图可视化展示组件（GraphVisualizer）- D3.js 力导向图实现
+ *
+ * 本组件使用 D3.js 的力导向图（Force-Directed Graph）算法将图数据渲染为交互式可视化。
+ *
+ * 可视化原理：
+ * - 使用 D3.js 的力模拟系统自动计算节点的最优布局位置
+ * - 力的类型包括：
+ *   1. 链接力（Link Force）：连接的节点相互吸引
+ *   2. 电荷力（Charge Force）：所有节点相互排斥（防止重叠）
+ *   3. 中心力（Center Force）：将节点拉向画布中心
+ *   4. 碰撞力（Collision Force）：防止节点重叠
+ *
+ * 渲染技术：
+ * - 使用 SVG <circle> 绘制节点，<line> 绘制边
+ * - 支持箭头标记（marker）表示有向边
+ * - 支持拖拽交互（drag behavior）
+ * - 高亮节点使用蓝色填充，高亮边使用蓝色加粗
+ *
+ * 与简单SVG实现的区别：
+ * - 节点位置由物理模拟自动计算，无需手动指定坐标
+ * - 支持动态布局调整和拖拽交互
+ * - 更适合展示复杂的图结构
+ */
+
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
+/** 图节点接口定义（扩展D3的SimulationNodeDatum） */
 interface GraphNode extends d3.SimulationNodeDatum {
   id: string;
   label: string;
 }
 
+/** 图边接口定义（扩展D3的SimulationLinkDatum） */
 interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
   source: string;
   target: string;
   weight?: number;
 }
 
+/** GraphVisualizer 组件的 Props 接口定义 */
 interface GraphVisualizerProps {
   nodes: GraphNode[];
   edges: GraphLink[];
@@ -20,6 +48,10 @@ interface GraphVisualizerProps {
   width?: number;
   height?: number;
 }
+
+/**
+ * 图可视化组件（D3.js 力导向图）
+ */
 
 const GraphVisualizer: React.FC<GraphVisualizerProps> = ({
   nodes,

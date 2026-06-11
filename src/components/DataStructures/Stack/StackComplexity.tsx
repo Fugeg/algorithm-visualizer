@@ -1,4 +1,14 @@
+/**
+ * @fileoverview 栈复杂度分析展示组件（StackComplexity）
+ *
+ * 本组件展示栈操作的复杂度分析和特点说明。
+ */
+
 import React from 'react';
+
+/**
+ * 栈复杂度分析组件
+ */
 
 const StackComplexity: React.FC = () => {
   const complexityData = [

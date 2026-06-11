@@ -1,4 +1,14 @@
+/**
+ * @fileoverview 队列复杂度分析展示组件（QueueComplexity）
+ *
+ * 本组件展示队列操作的复杂度分析、特点说明和循环队列原理。
+ */
+
 import React from 'react';
+
+/**
+ * 队列复杂度分析组件
+ */
 
 const QueueComplexity: React.FC = () => {
   const complexityData = [

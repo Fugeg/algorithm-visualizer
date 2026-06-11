@@ -1,10 +1,34 @@
+/**
+ * @fileoverview 栈可视化展示组件（StackVisualizer）
+ *
+ * 本组件负责将栈数据渲染为垂直堆叠的元素块，模拟真实的栈结构。
+ *
+ * 可视化原理：
+ * - 使用垂直 Flexbox 布局，栈底在下方，栈顶在上方
+ * - 显示空槽位（虚线边框）和已占用元素（实线边框）
+ * - 栈顶元素使用绿色边框特别标记
+ * - 支持高亮显示操作中的元素位置
+ *
+ * 渲染逻辑：
+ * 1. 计算空槽位数 = maxSize - items.length
+ * 2. 根据总容量动态计算元素大小和间距（自适应布局）
+ * 3. 先渲染空槽位（虚线框+灰色"Empty"标签）
+ * 4. 再反转数组渲染实际元素（栈顶在上）
+ * 5. 底部绘制基座线条，增强视觉层次感
+ */
+
 import React from 'react';
 
+/** StackVisualizer 组件的 Props 接口定义 */
 interface StackVisualizerProps {
   items: any[];
   highlightIndices: number[];
   maxSize: number;
 }
+
+/**
+ * 栈可视化组件
+ */
 
 const StackVisualizer: React.FC<StackVisualizerProps> = ({ items, highlightIndices = [], maxSize }) => {
   // 创建空槽位数组

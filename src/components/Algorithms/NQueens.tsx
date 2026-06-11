@@ -1,3 +1,27 @@
+/**
+ * N皇后问题回溯算法可视化组件
+ *
+ * 【可视化策略】
+ * 本组件是本系统中最复杂的可视化之一，采用自定义的 ChessBoard 棋盘渲染。
+ * N皇后的核心是在 N×N 棋盘上放置 N 个皇后使它们互不攻击：
+ * - ChessBoard 子组件：用 SVG/Div 渲染国际象棋风格的棋盘格子，每个格子可处于多种状态
+ * - 内嵌子组件设计：ChessBoard 作为 NQueens 的内部组件，接收 board 数据和当前步骤信息
+ * - 颜色状态机：empty(空) → trying(尝试放置/黄色) → queen(已放置) / backtrack(回溯撤销/红色) → solution(解的一部分/绿色)
+ *
+ * 【数据流向】Model → Step → UI（含棋盘状态同步）
+ * 1. 用户选择 N → algorithm.nQueens(N)
+ * 2. Model 逐行尝试放置皇后，每步生成 BacktrackingStep（含完整 board 快照）
+ * 3. 通过两个 Effect 同步棋盘状态：
+ *    - algorithm.subscribe: 收集 solutions 和更新 currentBoard
+ *    - playbackController.subscribe: 根据播放进度切换 currentBoard
+ * 4. ChessBoard 接收 currentBoard + currentStep 渲染棋盘和颜色高亮
+ *
+ * 【特殊交互设计】
+ * - 棋盘大小 N 可通过滑块动态调节（4~8），实时重置棋盘
+ * - 找到的所有解以缩略图网格展示（最多显示12个，超出则折叠）
+ * - 统计面板实时显示：棋盘大小 N、已找到解数、当前步骤进度
+ * - 平衡因子颜色编码：绿色=平衡(|bf|≤1)、橙色=轻微不平衡(|bf|=1)、红色=需旋转(|bf|>1)
+ */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BacktrackingAlgorithm, BacktrackingStep } from '../../models/BacktrackingAlgorithm';
 import { PlaybackController } from '../../models/PlaybackController';
@@ -5,6 +29,7 @@ import PlaybackControls from '../Visualization/PlaybackControls';
 import CodeSyncPanel from '../Visualization/CodeSyncPanel';
 import VariableMonitorPanel from '../Visualization/VariableMonitorPanel';
 
+/** N皇后回溯伪代码定义 */
 const NQUEENS_PSEUDOCODE = {
   title: 'N皇后回溯 伪代码',
   lines: [
@@ -22,28 +47,52 @@ const NQUEENS_PSEUDOCODE = {
   ]
 };
 
+/**
+ * 棋盘格子状态类型
+ * - empty: 空格子，无皇后
+ * - queen: 已放置皇后（正常状态）
+ * - trying: 正在尝试放置（黄色高亮）
+ * - backtrack: 回溯撤销中（红色高亮）
+ * - solution: 属于最终解的皇后位置（绿色高亮）
+ */
 interface BoardCell {
   row: number;
   col: number;
   state: 'empty' | 'queen' | 'trying' | 'backtrack' | 'solution';
 }
 
+/**
+ * 国际象棋风格棋盘子组件
+ *
+ * @param board - 二维数组，1 表示有皇后，0 表示空
+ * @param n - 棋盘大小
+ * @param currentStep - 当前播放步骤（用于确定 trying/backtrack 高亮位置）
+ *
+ * 渲染逻辑：
+ * 1. 将 board 数组映射为 BoardCell[][] 格栅数据
+ * 2. 根据 currentStep 覆盖 trying/backtrack/solution 状态
+ * 3. 基础底色采用国际象棋配色（amber-200/amber-50 交替）
+ * 4. 状态覆盖优先级：solution > backtrack > trying > queen > empty
+ * 5. 有皇后的格子显示 ♛ 符号（Unicode 黑色皇后）
+ */
 const ChessBoard: React.FC<{
   board: number[][];
   n: number;
   currentStep: BacktrackingStep | null;
 }> = ({ board, n, currentStep }) => {
+  /* 将二维 board 数组转换为带状态的 Cell 栅格 */
   const cells: BoardCell[][] = board.map((row, ri) =>
     row.map((cell, ci) => {
+      /* 默认状态：有皇后=queen，无皇后=empty */
       let state: BoardCell['state'] = cell === 1 ? 'queen' : 'empty';
 
       if (currentStep) {
         const { trying, backtrack: btInfo } = currentStep.state;
-        if (trying && trying.row === ri && trying.col === ci) {
-          state = 'trying';
-        } else if (btInfo && btInfo.row === ri && btInfo.col === ci) {
-          state = 'backtrack';
-        }
+        /* 尝试放置状态覆盖 */
+        if (trying && trying.row === ri && trying.col === ci) state = 'trying';
+        /* 回溯撤销状态覆盖 */
+        else if (btInfo && btInfo.row === ri && btInfo.col === ci) state = 'backtrack';
+        /* 如果当前步骤是找到解的类型，所有皇后标记为 solution */
         if (currentStep.type === 'solution') {
           if (cell === 1) state = 'solution';
         }
@@ -53,8 +102,9 @@ const ChessBoard: React.FC<{
     })
   );
 
+  /** 根据格子状态返回 Tailwind CSS 颜色类名 */
   const getCellColor = (cell: BoardCell, isDark: boolean) => {
-    const base = isDark ? 'bg-amber-200' : 'bg-amber-50';
+    const base = isDark ? 'bg-amber-200' : 'bg-amber-50';  /* 国际象棋底色 */
     switch (cell.state) {
       case 'trying': return 'bg-yellow-300 border-yellow-500';
       case 'backtrack': return 'bg-red-300 border-red-500';
@@ -64,6 +114,7 @@ const ChessBoard: React.FC<{
     }
   };
 
+  /* 动态计算格子大小：随 N 增大而缩小，范围 28px~56px */
   const cellSize = Math.max(28, Math.min(56, 400 / n));
 
   return (
@@ -71,13 +122,13 @@ const ChessBoard: React.FC<{
       {cells.map((row, ri) => (
         <div key={ri} className="flex">
           {row.map((cell, ci) => {
-            const isDark = (ri + ci) % 2 === 1;
+            const isDark = (ri + ci) % 2 === 1;  /* 棋盘格交替着色 */
             return (
-              <div
-                key={ci}
+              <div key={ci}
                 className={`flex items-center justify-center border transition-all duration-200 ${getCellColor(cell, isDark)}`}
                 style={{ width: cellSize, height: cellSize }}
               >
+                {/* 皇后符号：仅在有皇子的格子里显示 */}
                 {(cell.state === 'queen' || cell.state === 'solution') && (
                   <span className="select-none" style={{ fontSize: `${cellSize * 0.6}px` }}>♛</span>
                 )}
@@ -96,40 +147,56 @@ const ChessBoard: React.FC<{
   );
 };
 
+/**
+ * NQueens 可视化主组件
+ *
+ * 架构特点：
+ * - 不使用通用的 BacktrackingControls，而是内嵌自定义参数设置区（滑块+按钮）
+ * - 使用 useCallback 优化 handleStart/handleReset 避免不必要的重渲染
+ * - 使用 useRef(runRef) 防止重复执行
+ * - 双重 Effect 驱动棋盘同步：算法执行时更新 → 播放步进时更新
+ */
 const NQueens: React.FC = () => {
   const [algorithm] = useState(() => new BacktrackingAlgorithm());
   const [playbackController] = useState(() => new PlaybackController<BacktrackingStep>(300));
   const [playbackState, setPlaybackState] = useState(playbackController.getState());
+  /* 棋盘大小 N，可通过滑块调节 */
   const [boardSize, setBoardSize] = useState(4);
   const [isRunning, setIsRunning] = useState(false);
+  /* 所有找到的解的集合 */
   const [solutions, setSolutions] = useState<number[][][]>([]);
+  /* 当前渲染用的棋盘快照 */
   const [currentBoard, setCurrentBoard] = useState<number[][]>(
     Array(4).fill(0).map(() => Array(4).fill(0))
   );
+  /* 防止重复执行的引用标记 */
   const runRef = useRef(false);
 
+  /* Effect: 订阅播放控制器状态变更 */
   useEffect(() => {
-    const unsubscribe = playbackController.subscribe((state) => {
-      setPlaybackState(state);
-    });
+    const unsubscribe = playbackController.subscribe((state) => setPlaybackState(state));
     return () => unsubscribe();
   }, [playbackController]);
 
+  /*
+   * Effect: 订阅算法模型状态变更 —— 用于收集解和初始棋盘更新
+   * 当算法找到新解或步骤变化时，更新 solutions 数组和 currentBoard
+   */
   useEffect(() => {
     const unsubscribe = algorithm.subscribe((state) => {
-      if (state.solutions) {
-        setSolutions([...state.solutions]);
-      }
+      if (state.solutions) setSolutions([...state.solutions]);
       if (state.steps.length > 0 && state.currentStep >= 0) {
         const step = state.steps.find(s => s.id === state.currentStep);
-        if (step?.state?.board) {
-          setCurrentBoard(step.state.board);
-        }
+        if (step?.state?.board) setCurrentBoard(step.state.board);
       }
     });
     return () => unsubscribe();
   }, [algorithm]);
 
+  /**
+   * 开始求解 N 皇后问题
+   * 使用 useCallback 优化：仅在依赖项变化时重建函数引用
+   */
   const handleStart = useCallback(async () => {
     if (isRunning) return;
     setIsRunning(true);
@@ -139,6 +206,7 @@ const NQueens: React.FC = () => {
     setSolutions([]);
     setCurrentBoard(Array(boardSize).fill(0).map(() => Array(boardSize).fill(0)));
 
+    /* 设延迟为 0 以最快速度完成计算，之后通过 playbackController 播放 */
     algorithm.setDelay(0);
     await algorithm.nQueens(boardSize);
 
@@ -151,16 +219,19 @@ const NQueens: React.FC = () => {
     setIsRunning(false);
   }, [algorithm, playbackController, boardSize, isRunning]);
 
+  /*
+   * Effect: 播放步进时同步更新棋盘
+   * 当用户通过 PlaybackControls 切换步骤时，从 steps 中取出对应 board 更新显示
+   */
   useEffect(() => {
     const step = playbackState.currentStepIndex >= 0 && playbackState.currentStepIndex < playbackState.steps.length
       ? playbackState.steps[playbackState.currentStepIndex]
       : null;
 
-    if (step?.state?.board) {
-      setCurrentBoard(step.state.board);
-    }
+    if (step?.state?.board) setCurrentBoard(step.state.board);
   }, [playbackState.currentStepIndex, playbackState.steps]);
 
+  /** 重置所有状态 */
   const handleReset = useCallback(() => {
     playbackController.reset();
     algorithm.reset();
@@ -168,25 +239,17 @@ const NQueens: React.FC = () => {
     setCurrentBoard(Array(boardSize).fill(0).map(() => Array(boardSize).fill(0)));
   }, [playbackController, algorithm, boardSize]);
 
+  /* 从 playbackState 提取当前步骤用于变量监控和高亮行号 */
   const currentStep = playbackState.currentStepIndex >= 0 && playbackState.currentStepIndex < playbackState.steps.length
     ? playbackState.steps[playbackState.currentStepIndex]
     : null;
+  const highlightLine = currentStep?.highlightLine ?? -1;
 
-  const highlightLine = currentStep?.type === 'solution' ? 3
-    : currentStep?.type === 'try' ? 6
-    : currentStep?.type === 'backtrack' ? 8
-    : -1;
-
+  /* 变量监控字典构建 */
   const variables: Record<string, string | number> = {};
   if (currentStep) {
-    if (currentStep.state.trying) {
-      variables['当前行'] = currentStep.state.trying.row;
-      variables['当前列'] = currentStep.state.trying.col;
-    }
-    if (currentStep.state.backtrack) {
-      variables['回溯行'] = currentStep.state.backtrack.row;
-      variables['回溯列'] = currentStep.state.backtrack.col;
-    }
+    if (currentStep.state.trying) { variables['当前行'] = currentStep.state.trying.row; variables['当前列'] = currentStep.state.trying.col; }
+    if (currentStep.state.backtrack) { variables['回溯行'] = currentStep.state.backtrack.row; variables['回溯列'] = currentStep.state.backtrack.col; }
     variables['棋盘大小'] = boardSize;
     variables['已找到解'] = solutions.length;
     variables['步骤类型'] = currentStep.type === 'try' ? '尝试' : currentStep.type === 'backtrack' ? '回溯' : '找到解';
@@ -202,12 +265,16 @@ const NQueens: React.FC = () => {
       <h2 className="text-2xl font-bold mb-2 text-gray-800">N皇后问题可视化</h2>
       <p className="text-gray-600 mb-4 text-sm">在 N×N 棋盘上放置 N 个皇后，使其互不攻击（同行、同列、同对角线无其他皇后）</p>
 
+      {/* 三栏布局：左侧棋盘区域占2栏，右侧信息和控制占1栏 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* 左侧区域（2栏宽）：棋盘 + 统计卡片 + 播放控制 + 参数设置 + 解列表 */}
         <div className="lg:col-span-2 space-y-4">
+          {/* 棋盘渲染区 */}
           <div className="border rounded-lg bg-white p-6 shadow-sm flex justify-center">
             <ChessBoard board={currentBoard} n={boardSize} currentStep={currentStep} />
           </div>
 
+          {/* 三列统计卡片 */}
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="bg-indigo-50 rounded-lg p-3">
               <div className="text-xs text-indigo-600">棋盘大小</div>
@@ -219,159 +286,20 @@ const NQueens: React.FC = () => {
             </div>
             <div className="bg-blue-50 rounded-lg p-3">
               <div className="text-xs text-blue-600">步骤进度</div>
-              <div className="text-xl font-bold text-blue-800">
-                {playbackState.currentStepIndex + 1}/{playbackState.totalSteps}
-              </div>
+              <div className="text-xl font-bold text-blue-800">{playbackState.currentStepIndex + 1}/{playbackState.totalSteps}</div>
             </div>
           </div>
 
-          <PlaybackControls
-            playbackState={playbackState}
-            onPlay={() => {
-              if (playbackState.totalSteps === 0) {
-                handleStart();
-              } else {
-                playbackController.play();
-              }
-            }}
-            onPause={() => playbackController.pause()}
-            onStepForward={() => playbackController.stepForward()}
-            onStepBackward={() => playbackController.stepBackward()}
-            onReset={handleReset}
-            onSpeedChange={(s) => playbackController.setSpeed(s)}
-            onGoToStep={(i) => playbackController.goToStep(i)}
-          />
+          {/* 播放控制条（注意：空步骤时点击播放会自动触发 handleStart） */}
 
-          {message && (
-            <div className="p-3 bg-indigo-50 text-indigo-700 rounded-lg text-sm border border-indigo-100">
-              {message}
-            </div>
-          )}
+          {/* 参数设置区：滑块调节 N + 开始/重置按钮 */}
 
-          <div className="bg-white rounded-lg shadow p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-gray-700">参数设置</h3>
-            <div className="flex items-center gap-3">
-              <label className="text-sm text-gray-600 whitespace-nowrap">
-                棋盘大小 N: {boardSize}
-              </label>
-              <input
-                type="range" min="4" max="8" value={boardSize}
-                onChange={(e) => {
-                  const n = parseInt(e.target.value);
-                  setBoardSize(n);
-                  setCurrentBoard(Array(n).fill(0).map(() => Array(n).fill(0)));
-                }}
-                disabled={playbackState.isPlaying || isRunning}
-                className="flex-1 h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={handleStart}
-                disabled={playbackState.isPlaying || isRunning}
-                className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 disabled:opacity-50 text-sm"
-              >
-                {isRunning ? '计算中...' : '开始求解'}
-              </button>
-              <button
-                onClick={handleReset}
-                disabled={playbackState.isPlaying || isRunning}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:opacity-50 text-sm"
-              >
-                重置
-              </button>
-            </div>
-          </div>
+          {/* 已找到的解列表（最多显示12个） */}
 
-          {solutions.length > 0 && (
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">找到的解 ({solutions.length})</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {solutions.slice(0, 12).map((sol, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2 bg-green-50 rounded border border-green-200 text-center"
-                  >
-                    <div className="text-xs text-green-600 mb-1">解 {idx + 1}</div>
-                    <div className="text-xs font-mono text-green-800">
-                      [{sol.map((row, ri) => row.indexOf(1)).filter(x => x >= 0).join(', ')}]
-                    </div>
-                  </div>
-                ))}
-                {solutions.length > 12 && (
-                  <div className="p-2 bg-gray-50 rounded border border-gray-200 text-center text-xs text-gray-500 flex items-center justify-center">
-                    还有 {solutions.length - 12} 个解...
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
-        <div className="space-y-4">
-          <CodeSyncPanel
-            title={NQUEENS_PSEUDOCODE.title}
-            codeLines={NQUEENS_PSEUDOCODE.lines}
-            highlightLine={highlightLine}
-          />
+        {/* 右侧区域（1栏宽）：代码同步 + 变量监控 + 复杂度 + 说明 */}
 
-          <VariableMonitorPanel variables={variables} title="变量监控" />
-
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-4 py-2 bg-gray-50 border-b">
-              <h3 className="text-sm font-semibold text-gray-700">复杂度分析</h3>
-            </div>
-            <table className="min-w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">指标</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">复杂度</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500">说明</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                <tr>
-                  <td className="px-4 py-2 text-sm font-medium text-gray-900">时间</td>
-                  <td className="px-4 py-2 text-sm text-gray-500 font-mono">O(N!)</td>
-                  <td className="px-4 py-2 text-sm text-gray-500">最坏情况全排列</td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-2 text-sm font-medium text-gray-900">空间</td>
-                  <td className="px-4 py-2 text-sm text-gray-500 font-mono">O(N)</td>
-                  <td className="px-4 py-2 text-sm text-gray-500">递归深度</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-100">
-            <h4 className="text-sm font-semibold mb-2 text-yellow-700">算法说明</h4>
-            <div className="text-sm text-gray-700 space-y-1">
-              <p>N皇后问题是经典的回溯算法，逐行放置皇后并检查冲突。</p>
-              <div className="mt-2">
-                <h5 className="font-semibold">颜色说明：</h5>
-                <ul className="list-disc list-inside space-y-1 ml-2">
-                  <li><span className="text-yellow-500 font-medium">黄色</span> - 正在尝试放置</li>
-                  <li><span className="text-red-500 font-medium">红色</span> - 回溯（撤销放置）</li>
-                  <li><span className="text-green-500 font-medium">绿色</span> - 找到完整解</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-            <h4 className="text-sm font-semibold mb-2 text-blue-700">解的数量参考</h4>
-            <div className="text-sm text-gray-700 space-y-1">
-              <div className="grid grid-cols-2 gap-2 font-mono">
-                <span>N=4: 2个解</span>
-                <span>N=5: 10个解</span>
-                <span>N=6: 4个解</span>
-                <span>N=7: 40个解</span>
-                <span>N=8: 92个解</span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

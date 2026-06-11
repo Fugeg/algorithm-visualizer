@@ -1,5 +1,17 @@
+/**
+ * @fileoverview 栈操作控制面板组件（StackOperations）
+ *
+ * 本组件提供栈的交互式操作界面，支持入栈、出栈和查看栈顶操作。
+ *
+ * 功能特点：
+ * - 入栈时检查栈是否已满，满时禁用按钮
+ * - 出栈/查看时检查栈是否为空，空时禁用按钮
+ * - 操作结果显示为消息提示，2秒后自动消失
+ */
+
 import React, { useState } from 'react';
 
+/** StackOperations 组件的 Props 接口定义 */
 interface StackOperationsProps {
   onPush: (value: any) => Promise<boolean>;
   onPop: () => Promise<any>;
@@ -7,6 +19,10 @@ interface StackOperationsProps {
   isFull: boolean;
   isEmpty: boolean;
 }
+
+/**
+ * 栈操作控制面板组件
+ */
 
 const StackOperations: React.FC<StackOperationsProps> = ({
   onPush,
