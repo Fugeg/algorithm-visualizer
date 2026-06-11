@@ -30,7 +30,6 @@ import { Link } from 'react-router-dom';
  */
 const Header: React.FC = () => {
   return (
-    {/* 语义化头部容器，使用 CSS 类名控制样式 */}
     <header className="header">
       {/* 应用品牌标识/Logo */}
       <h1>Algorithm Visualizer</h1>

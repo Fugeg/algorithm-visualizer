@@ -31,7 +31,6 @@ import { Link } from 'react-router-dom';
  */
 const Sidebar: React.FC = () => {
   return (
-    {/* 语义化侧边栏容器，aside 表示页面辅助内容区域 */}
     <aside className="sidebar">
       {/* 导航内容包裹器 */}
       <nav>

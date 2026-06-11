@@ -104,7 +104,6 @@ export const UserMenu: React.FC<UserMenuProps> = ({ onLoginClick }) => {
   /* ===== 未登录状态渲染 ===== */
   if (!isAuthenticated) {
     return (
-      {/* 登录按钮：主色调背景，悬停时颜色加深 */}
       <button
         onClick={onLoginClick}
         className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"

@@ -55,7 +55,6 @@ const Layout: React.FC = () => {
   ];
 
   return (
-    {/* 外层容器：使用 flex 布局实现水平排列，占满整个视口高度 */}
     <div className="flex h-screen">
       {/* ===== 左侧导航栏区域 ===== */}
       {/* 固定宽度256px，深靛蓝色背景，白色文字 */}

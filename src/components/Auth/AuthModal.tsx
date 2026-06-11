@@ -177,7 +177,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
   };
 
   return (
-    {/* 外层遮罩容器：全屏半透明黑色背景，居中显示弹窗 */}
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       {/* 弹窗主体：白色圆角卡片，最大宽度448px */}
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 relative">

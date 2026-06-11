@@ -175,9 +175,17 @@ const MakeChange: React.FC = () => {
             {renderCurrentState()}
           </div>
 
-          <PlaybackControls ... />
-          <CodeSyncPanel ... />
-          <VariableMonitorPanel ... />
+          <PlaybackControls
+            state={state}
+            dispatch={dispatch}
+          />
+          <CodeSyncPanel
+            code={code}
+            currentLine={state.currentStep >= 0 && state.currentStep < state.steps.length ? state.steps[state.currentStep].highlightLine ?? -1 : -1}
+          />
+          <VariableMonitorPanel
+            variables={state.currentStep >= 0 && state.currentStep < state.steps.length ? state.steps[state.currentStep].variables : {}}
+          />
           {/* 复杂度/说明/图略 —— 与其他组件结构一致 */}
         </div>
       </div>

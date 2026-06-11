@@ -61,7 +61,6 @@ const DataStructureLayout: React.FC<DataStructureLayoutProps> = ({
   console.log('Complexity prop:', complexity);
 
   return (
-    {/* 外层容器：最大宽度限制（1280px），水平居中，内边距24px */}
     <motion.div
       className="p-6 max-w-7xl mx-auto"
       initial={{ opacity: 0 }}

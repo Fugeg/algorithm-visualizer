@@ -92,11 +92,6 @@ const ASTVisualizer: React.FC<ASTVisualizerProps> = ({ ast }) => {
   const { nodes, edges } = convertASTToElements(ast);
 
   return (
-    // 
-     * ReactFlowProvider - 必须的外层包裹组件
-     * 提供 ReactFlow 运行所需的 Context（状态管理、事件系统等）
-     * 确保在复杂组件树中 ReactFlow 能正常工作
-     //
     <ReactFlowProvider>
       {/* 
        * 固定尺寸容器 - ReactFlow 需要明确的宽高才能正确初始化
