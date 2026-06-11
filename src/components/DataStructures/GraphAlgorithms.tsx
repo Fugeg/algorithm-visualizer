@@ -164,6 +164,10 @@ const GraphAlgorithms: React.FC = () => {
   const [traversalOrder, setTraversalOrder] = useState<string[]>([]);
   const [queueState, setQueueState] = useState<string[]>([]);
   const [stackState, setStackState] = useState<string[]>([]);
+  const [visitedNodes, setVisitedNodes] = useState<string[]>([]);
+  const [currentNode, setCurrentNode] = useState<string | null>(null);
+  const [distances, setDistances] = useState<Record<string, number>>({});
+  const [path, setPath] = useState<Record<string, string>>({});
 
   const nodesRef = useRef(DEFAULT_NODES);
   const edgesRef = useRef(DEFAULT_EDGES);
