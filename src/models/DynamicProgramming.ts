@@ -165,6 +165,17 @@ export class DynamicProgramming {
     // 外层循环：遍历每个元素作为"子序列的末尾"
     // 教学要点：i 是"当前位置"，我们要确定以它结尾的最优解
     for (let i = 1; i < n; i++) {
+      // 外层循环：遍历每个元素作为"子序列的末尾"
+      // 教学要点：i 是"当前位置"，我们要确定以它结尾的最优解
+      this.addStep('calculate', {
+        nums,
+        dp: dp.slice(),
+        prev: prev.slice(),
+        current: i,
+        comparing: -1
+      }, `处理第 ${i} 个元素 nums[${i}] = ${nums[i]}`, 3);
+      await this.wait();
+
       // 内层循环：向前查找所有能接在 nums[i] 前面的递增元素
       // 教学要点：j 代表"候选前驱"。只有当 nums[j] < nums[i] 时，
       // nums[i] 才能接在 nums[j] 后面形成更长的递增子序列
@@ -175,7 +186,7 @@ export class DynamicProgramming {
           prev: prev.slice(),
           current: i,
           comparing: j
-        }, `比较 nums[${i}] = ${nums[i]} 和 nums[${j}] = ${nums[j]}`, 5);
+        }, `比较 nums[${i}] = ${nums[i]} 和 nums[${j}] = ${nums[j]}`, 4);
         await this.wait();
 
         if (nums[i] > nums[j] && dp[j] + 1 > dp[i]) {
@@ -190,7 +201,7 @@ export class DynamicProgramming {
             current: i,
             comparing: j,
             update: true
-          }, `更新 dp[${i}] = dp[${j}] + 1 = ${dp[i]}（找到更长的递增前缀）`, 6);
+          }, `更新 dp[${i}] = dp[${j}] + 1 = ${dp[i]}（找到更长的递增前缀）`, 5);
           await this.wait();
 
           if (dp[i] > maxLen) {
@@ -254,6 +265,15 @@ export class DynamicProgramming {
     await this.wait();
 
     for (let i = 1; i <= n; i++) {
+      // 外层循环：遍历每个物品
+      this.addStep('calculate', {
+        weights,
+        values,
+        dp: dp.map(row => [...row]),
+        current: { item: i - 1, weight: -1 }
+      }, `处理第 ${i} 个物品（重量：${weights[i-1]}，价值：${values[i-1]}）`, 3);
+      await this.wait();
+
       for (let w = 0; w <= capacity; w++) {
         this.addStep('calculate', {
           weights,
@@ -282,7 +302,7 @@ export class DynamicProgramming {
           dp: dp.map(row => [...row]),
           current: { item: i - 1, weight: w },
           update: true
-        }, `更新 dp[${i}][${w}] = ${dp[i][w]}`, 7);
+        }, `更新 dp[${i}][${w}] = ${dp[i][w]}`, 6);
         await this.wait();
       }
     }
@@ -361,6 +381,15 @@ export class DynamicProgramming {
     await this.wait();
 
     for (let i = 1; i <= m; i++) {
+      // 外层循环：遍历 word1 的每个字符
+      this.addStep('calculate', {
+        word1,
+        word2,
+        dp: dp.map(row => [...row]),
+        current: { i: i - 1, j: -1 }
+      }, `处理 word1[${i}] = '${word1[i-1]}'`, 5);
+      await this.wait();
+
       for (let j = 1; j <= n; j++) {
         this.addStep('calculate', {
           word1,
@@ -389,7 +418,7 @@ export class DynamicProgramming {
           dp: dp.map(row => [...row]),
           current: { i: i - 1, j: j - 1 },
           update: true
-        }, `更新 dp[${i}][${j}] = ${dp[i][j]}`, 10);
+        }, `更新 dp[${i}][${j}] = ${dp[i][j]}`, 9);
         await this.wait();
       }
     }

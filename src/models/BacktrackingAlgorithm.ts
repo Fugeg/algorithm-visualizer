@@ -149,7 +149,7 @@ export class BacktrackingAlgorithm {
         this.addStep('solution', level, {
           current: [...current],
           used: [...used]
-        }, `找到一个解: [${current.join(', ')}]`, 9);
+        }, `找到一个解: [${current.join(', ')}]`, 4);
         await this.wait();
         return;
       }
@@ -398,7 +398,7 @@ export class BacktrackingAlgorithm {
         this.addStep('backtrack', 0, {
           board: board.map(row => [...row]),
           backtrack: { row, col, num }
-        }, `回溯，移除位置 (${row}, ${col}) 的数字 ${num}`, 6);
+        }, `回溯，移除位置 (${row}, ${col}) 的数字 ${num}`, 10);
         await this.wait();
       }
 

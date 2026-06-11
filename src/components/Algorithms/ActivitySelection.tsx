@@ -36,6 +36,7 @@ const ACTIVITY_SELECTION_PSEUDOCODE = {
     { text: 'selected.push(activities[i])', indent: 3 },
     { text: 'lastEnd = activities[i].end', indent: 3 },
     { text: 'return selected', indent: 1 },
+    { text: '// end selectActivities', indent: 0 },
   ]
 };
 

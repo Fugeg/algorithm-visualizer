@@ -174,7 +174,7 @@ export class RecursionAlgorithm {
     this.state.currentStep = step.id;
     this.notify(`计算 fibonacci(${n})`);
     // 标记为 active：正式进入函数体执行
-    this.updateStepState(step.id, 'active', undefined, 0);
+    this.updateStepState(step.id, 'active', undefined, 1);
     await this.wait();
 
     /**
@@ -198,10 +198,10 @@ export class RecursionAlgorithm {
     const result = result1 + result2;
 
     // returning 状态：所有子调用已完成，当前节点准备向上返回
-    this.updateStepState(step.id, 'returning', undefined, 5);
+    this.updateStepState(step.id, 'returning', undefined, 6);
     await this.wait();
     // complete 状态：标记最终结果
-    this.updateStepState(step.id, 'complete', result, 5);
+    this.updateStepState(step.id, 'complete', result, 6);
 
     return result;
   }
@@ -224,12 +224,12 @@ export class RecursionAlgorithm {
     const step = this.createStep(level, 'factorial', [n], parentId, 0);
     this.state.currentStep = step.id;
     this.notify(`计算 factorial(${n})`);
-    this.updateStepState(step.id, 'active', undefined, 0);
+    this.updateStepState(step.id, 'active', undefined, 1);
     await this.wait();
 
     // Base Case：0! = 1! = 1
     if (n <= 1) {
-      this.updateStepState(step.id, 'complete', 1, 1);
+      this.updateStepState(step.id, 'complete', 1, 2);
       return 1;
     }
 
@@ -237,9 +237,9 @@ export class RecursionAlgorithm {
     const subResult = await this.factorial(n - 1, level + 1, step.id);
     const result = n * subResult;
 
-    this.updateStepState(step.id, 'returning', undefined, 3);
+    this.updateStepState(step.id, 'returning', undefined, 4);
     await this.wait();
-    this.updateStepState(step.id, 'complete', result, 3);
+    this.updateStepState(step.id, 'complete', result, 4);
 
     return result;
   }
@@ -270,7 +270,7 @@ export class RecursionAlgorithm {
     const step = this.createStep(level, 'hanoi', [n, from, to, aux], parentId, 0);
     this.state.currentStep = step.id;
     this.notify(`移动 ${n} 个圆盘从 ${from} 到 ${to}`);
-    this.updateStepState(step.id, 'active', undefined, 0);
+    this.updateStepState(step.id, 'active', undefined, 1);
     await this.wait();
 
     /**
@@ -292,9 +292,9 @@ export class RecursionAlgorithm {
     await this.hanoi(n - 1, aux, to, from, level + 1, step.id);
 
     // 回溯：三个子任务都完成了，当前层级的任务也完成
-    this.updateStepState(step.id, 'returning', undefined, 5);
+    this.updateStepState(step.id, 'returning', undefined, 6);
     await this.wait();
-    this.updateStepState(step.id, 'complete', `完成移动 ${n} 个圆盘`, 5);
+    this.updateStepState(step.id, 'complete', `完成移动 ${n} 个圆盘`, 6);
   }
 
   reset() {

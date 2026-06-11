@@ -34,11 +34,12 @@ const FIBONACCI_PSEUDOCODE = {
   title: '斐波那契递归 伪代码',
   lines: [
     { text: 'function fib(n):', indent: 0 },
-    { text: 'if n == 0: return 0', indent: 1 },
-    { text: 'if n == 1: return 1', indent: 1 },
+    { text: 'if n <= 1:', indent: 1 },
+    { text: '  return n', indent: 1 },
     { text: 'left = fib(n - 1)', indent: 1 },
     { text: 'right = fib(n - 2)', indent: 1 },
     { text: 'return left + right', indent: 1 },
+    { text: '// end fib', indent: 0 },
   ]
 };
 

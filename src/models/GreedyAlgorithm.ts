@@ -205,14 +205,14 @@ export class GreedyAlgorithm {
           activity,
           selected: [...selected],
           lastEnd
-        }, `选择活动 ${activity.id}（开始: ${activity.start}, 结束: ${activity.end}）`, 6);
+        }, `选择活动 ${activity.id}（开始: ${activity.start}, 结束: ${activity.end}）`, 7);
         await this.wait();
       } else {
         this.addStep('skip', {
           activity,
           selected: [...selected],
           lastEnd
-        }, `跳过活动 ${activity.id}，因为它与已选活动重叠`, 5);
+        }, `跳过活动 ${activity.id}，因为它与已选活动重叠`, 8);
         await this.wait();
       }
     }
@@ -221,7 +221,7 @@ export class GreedyAlgorithm {
     this.addStep('solution', {
       selected: [...selected],
       count: selected.length
-    }, `共选择了 ${selected.length} 个活动`, 8);
+    }, `共选择了 ${selected.length} 个活动`, 9);
 
     this.state.isComplete = true;
     this.notify('活动选择完成');
